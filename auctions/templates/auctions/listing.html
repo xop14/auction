@@ -1,0 +1,28 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% if error_message %}
+        <h2>No Listing Found</h2>
+    {% else %}
+        <h2>Listing: {{ listing.title }}</h2>
+        {% if listing.is_active == True %}
+            <p>Status: Active</p>
+        {% else %}
+            <p>Status: Finished</p>
+        {% endif %}
+        <p>Add to watch list</p>
+        <img src="{{ listing.photo_url}}" width="400px" alt="{{ listing.title }}">
+        <h3>Description</h3>
+        <p>{{ listing.description }}</p>
+        <h3>Seller Info</h3>
+        <p>Seller ID: {{ listing.id }}</p>
+        <p>Seller Username: USERNAME</p>
+        <h3>Bid Status</h3>
+        <p>Starting bid: {{ listing.starting_bid }}</p>
+        <p>Current highest Bid</p>
+        <h3>Make bid for this item</h3>
+        <p>Bid section goes here</p>
+        <h3>Comments</h3>
+        <p>Comments go here...</p>
+    {% endif %}
+{% endblock %}
