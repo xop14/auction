@@ -19,13 +19,16 @@ class CreateListingForm(forms.Form):
     photo_url = forms.URLField(label="Photo URL (optional)", required=False)
     starting_bid = forms.DecimalField(label="Starting bid (USD)", decimal_places=2, max_digits=7)
 
+class BidForm(forms.Form):
+    bid_amount = forms.DecimalField(decimal_places=2, max_digits=7)
+
 def index(request):
-    print(request.user.username)
     return render(request, "auctions/index.html", {
         "listings": Listing.objects.all(),
-        "current_user_id": request.user.id,
+        "current_user_id": request.user.id
     })
-    
+
+@login_required    
 def create(request):
     
     if request.method == "POST":
@@ -48,6 +51,67 @@ def create(request):
 
 def listing(request, listing_id):
     error_message = None
+    if Bid.objects.filter(listing_id = listing_id):
+        current_highest_bid = Bid.objects.filter(listing_id = listing_id).order_by('-bid_amount')[0].bid_amount
+    else:
+        current_highest_bid = "No bids yet"
+    
+    
+    if request.method == "POST":
+        print(request.POST)
+        this_listing = Listing.objects.get(pk=listing_id)
+        
+        # button actions for delete, edit, end
+        if "delete" in request.POST:
+            this_listing.delete()
+            return HttpResponseRedirect(reverse("index"))
+        if "edit" in request.POST:
+            return HttpResponseRedirect(reverse("edit", kwargs={"listing_id": listing_id}))
+        if "end" in request.POST:
+            this_listing.is_active = False
+            this_listing.save()
+            
+        # bid section
+        if "bid_amount" in request.POST:
+            this_bid = request.POST["bid_amount"]
+            bid = Bid(
+                user_id = request.user.id,
+                listing_id = listing_id,
+                bid_amount = request.POST["bid_amount"]
+                )
+            bid.save()
+            return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+            
+        
+    # get listing content
+    try:
+        listing = Listing.objects.get(id=listing_id)
+    except ObjectDoesNotExist:
+        error_message = "This listing does not exist"
+        listing = None
+    
+    # get listing creators username
+    try:
+        creator = User.objects.get(id=listing.user_id)
+    except ObjectDoesNotExist:
+        error_message = "This user no longer exists"
+        creator = None
+    
+    bid_form = BidForm()
+    
+    return render(request, "auctions/listing.html", {
+        "listing": listing,
+        "error_message": error_message,
+        "creator": creator,
+        "bid_form": bid_form,
+        "current_highest_bid": current_highest_bid
+    })
+
+
+def edit(request, listing_id):
+    
+    # get listing content
+    error_message = None
     
     try:
         listing = Listing.objects.get(id=listing_id)
@@ -55,10 +119,35 @@ def listing(request, listing_id):
         error_message = "This listing does not exist"
         listing = None
     
-    return render(request, "auctions/listing.html", {
+    
+    if request.method == "POST":
+        form = CreateListingForm(request.POST)
+        if form.is_valid():
+            listing.title = form.cleaned_data["title"]
+            listing.description = form.cleaned_data["description"]
+            listing.category = form.cleaned_data["category"]
+            listing.photo_url = form.cleaned_data["photo_url"]
+            listing.starting_bid = form.cleaned_data["starting_bid"]
+            listing.save()
+        return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+    
+
+    form = CreateListingForm({
+        "title": listing.title,
+        "description": listing.description,
+        "category": listing.category,
+        "photo_url": listing.photo_url,
+        "starting_bid": listing.starting_bid,
+        })
+    
+    return render(request, "auctions/edit.html", {
+        "listing_id": listing_id,
         "listing": listing,
-        "error_message": error_message
+        "error_message": error_message,
+        "form": form,
     })
+
+
 
 def login_view(request):
     if request.method == "POST":

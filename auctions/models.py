@@ -12,7 +12,7 @@ class Listing(models.Model):
     photo_url = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
     starting_bid = models.DecimalField(decimal_places=2, max_digits=7)
-    user_id = models.IntegerField()
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     
@@ -22,7 +22,7 @@ class Listing(models.Model):
 class Bid(models.Model): 
     time_stamp = models.DateTimeField(auto_now=True)
     listing_id = models.IntegerField()
-    user_id = models.IntegerField()
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids")
     bid_amount = models.DecimalField(decimal_places=2, max_digits=7)
     
     def __str__(self):
@@ -36,7 +36,7 @@ class Bid(models.Model):
 class Comment(models.Model):
     time_stamp = models.DateTimeField(auto_now=True)
     listing_id = models.IntegerField()
-    user_id = models.IntegerField()
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     comment = models.CharField(max_length=1024)
     
     def __str__(self):

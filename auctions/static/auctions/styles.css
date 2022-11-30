@@ -13,3 +13,8 @@ form input, textarea {
     padding-inline: 10px;
     margin-bottom: 20px;
 }
+
+#listing-settings {
+    flex-direction: row;
+    gap: 10px;
+}
