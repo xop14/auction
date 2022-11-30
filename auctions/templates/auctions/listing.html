@@ -32,13 +32,15 @@
         </div>
         <h3>Bid Status</h3>
         <p>Starting bid: {{ listing.starting_bid }}</p>
-        <p>Current highest Bid: {{ current_highest_bid }}</p>
-        <h3>Make new bid for this item</h3>
-        <form action="{% url 'listing' listing.id %}" method="post">
-            {% csrf_token %}
-            {{ bid_form }}
-            <button type="submit">Submit bid</button>
-        </form>
+        <p>Current highest bid: {{ current_highest_bid }}{% if bidder_username %} ({{ bidder_username }}){% endif %}</p>
+        {% if user.is_authenticated and listing.user_id != user.id%}
+            <h3>Make new bid for this item</h3>
+            <form action="{% url 'listing' listing.id %}" method="post">
+                {% csrf_token %}
+                {{ bid_form }}
+                <button type="submit">Submit bid</button>
+            </form>
+        {% endif %}
         <h3>Comments</h3>
         <p>Comments go here...</p>
     {% endif %}

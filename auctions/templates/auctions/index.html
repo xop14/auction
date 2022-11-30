@@ -9,6 +9,7 @@
                 <img src="{{ listing.photo_url }}" height="200px">
                 <p>{{ listing.description }}</p>
                 <p>Starting bid: ${{ listing.starting_bid }}</p>
+                <p>Current highest bid: TODO</p>
                 <a href="{% url 'listing' listing.id %}">View listing</a>
                 {% if listing.user_id == current_user_id %}
                     <a href="{% url 'edit' listing.id%}">Edit listing</a>
