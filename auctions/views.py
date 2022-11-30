@@ -7,10 +7,7 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django import forms
 
-from .models import User
-from .models import Listing
-from .models import Bid
-from .models import Comment
+from .models import *
 
 
 ### forms ###
@@ -20,7 +17,7 @@ class CreateListingForm(forms.Form):
     description = forms.CharField(label="Description", widget=forms.Textarea(attrs={'cols':10, 'rows':3}), max_length=1024)
     category = forms.CharField(label="Category", max_length=32)
     photo_url = forms.URLField(label="Photo URL (optional)", required=False)
-    starting_bid = forms.DecimalField(label="Starting bid (USD)", decimal_places=2, max_digits=7)
+    starting_bid = forms.DecimalField(label="Starting bid (USD)", decimal_places=2, max_digits=7, max_value=9999.99)
     
     
     
@@ -30,7 +27,6 @@ class CreateListingForm(forms.Form):
 def index(request):
     return render(request, "auctions/index.html", {
         "listings": Listing.objects.all(),
-        "current_user_id": request.user.id
     })
 
 
@@ -47,7 +43,7 @@ def create(request):
                 category = form.cleaned_data["category"],
                 photo_url = form.cleaned_data["photo_url"],
                 starting_bid = form.cleaned_data["starting_bid"],
-                user_id = request.user.id
+                user = request.user
             )
             listing.save()
         return HttpResponseRedirect(reverse("index"))
@@ -62,13 +58,12 @@ def create(request):
 def edit(request, listing_id):
     
     # get listing content
-    error_message = None
-    
     try:
         listing = Listing.objects.get(id=listing_id)
     except ObjectDoesNotExist:
-        error_message = "This listing does not exist"
-        listing = None
+        return render(request, "auctions/edit.html", {
+            "error_message": "No listing found"
+        })
     
     
     if request.method == "POST":
@@ -94,7 +89,6 @@ def edit(request, listing_id):
     return render(request, "auctions/edit.html", {
         "listing_id": listing_id,
         "listing": listing,
-        "error_message": error_message,
         "form": form,
     })
 
@@ -105,21 +99,20 @@ def listing(request, listing_id):
     error_message = None
     
     # check if bids exist for this listing and set bid-related variables
-    if Bid.objects.filter(listing_id = listing_id):
-        current_highest_bid = Bid.objects.filter(listing_id = listing_id).order_by('-bid_amount')[0].bid_amount
-        bidder_id = Bid.objects.filter(listing_id = listing_id).order_by('-bid_amount')[0].user_id
-        bidder_username = User.objects.get(id = bidder_id).username   
+    if Bid.objects.filter(listing = listing_id):
+        current_highest_bid = Bid.objects.filter(listing = listing_id).order_by('-bid_amount')[0].bid_amount
+        current_highest_bidder = Bid.objects.filter(listing = listing_id).order_by('-bid_amount')[0].user
     else:
         current_highest_bid = 0.00
-        bidder_id = None
-        bidder_username = None
+        current_highest_bidder = None
     
-    # get listing content
+    # get listing content and return error message if listing does not exist
     try:
         listing = Listing.objects.get(id=listing_id)
     except ObjectDoesNotExist:
-        error_message = "This listing does not exist"
-        listing = None
+        return render(request, "auctions/listing.html", {
+        "error_message": "No listing found"
+    })
     
     
     # post
@@ -146,28 +139,22 @@ def listing(request, listing_id):
                 )
             bid.save()
             return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
-            
-    
-    # get listing creators username
-    try:
-        creator = User.objects.get(id=listing.user_id)
-    except ObjectDoesNotExist:
-        error_message = "This user no longer exists"
-        creator = None
     
     # create form within this view to is has access to this views variables for easier validation
     class BidForm(forms.Form):
-        bid_amount = forms.DecimalField(decimal_places=2, max_digits=7, min_value=max(current_highest_bid, listing.starting_bid) + 1)
+        bid_amount = forms.DecimalField(label="Bid amount (USD)", decimal_places=2, max_digits=7, min_value=max(current_highest_bid, listing.starting_bid) + 1)
     
     bid_form = BidForm()
+    
+    if current_highest_bid == 0.00:
+        current_highest_bid = None
     
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "error_message": error_message,
-        "creator": creator,
         "bid_form": bid_form,
         "current_highest_bid": current_highest_bid,
-        "bidder_username": bidder_username
+        "current_highest_bidder": current_highest_bidder
     })
 
 

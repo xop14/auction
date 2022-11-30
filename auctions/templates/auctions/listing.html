@@ -17,9 +17,9 @@
         <h3>Description</h3>
         <p>{{ listing.description }}</p>
         <h3>Seller Info</h3>
-        <p>Seller: {{ creator }}</p>
+        <p>Seller: {{ listing.user }}</p>
         <div>
-            {% if user.id == listing.user_id %}
+            {% if user == listing.user %}
                 <h2>Listing Settings</h2>
                 <form id="listing-settings" action="{% url 'listing' listing.id %}" method="post">
                     {% csrf_token %}
@@ -31,9 +31,18 @@
             {% endif %}
         </div>
         <h3>Bid Status</h3>
-        <p>Starting bid: {{ listing.starting_bid }}</p>
-        <p>Current highest bid: {{ current_highest_bid }}{% if bidder_username %} ({{ bidder_username }}){% endif %}</p>
-        {% if user.is_authenticated and listing.user_id != user.id%}
+        <p>Starting bid: ${{ listing.starting_bid }}</p>
+        <p>Current highest bid:
+            {% if current_highest_bid %}
+                ${{ current_highest_bid }}
+            {% else %}
+                No bids yet
+            {% endif %}
+            {% if current_highest_bidder %}
+                ({{ current_highest_bidder }})
+            {% endif %}
+        </p>
+        {% if user.is_authenticated and listing.user != user %}
             <h3>Make new bid for this item</h3>
             <form action="{% url 'listing' listing.id %}" method="post">
                 {% csrf_token %}
