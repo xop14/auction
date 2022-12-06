@@ -126,12 +126,14 @@ def listing(request, listing_id):
     
     # get watchlist status
     # get_or_create returns a tuple and so requires the 'created' part which returns True if created and False if not
-    watchlist, created = Watchlist.objects.get_or_create(user=request.user)
-    
-    if listing in watchlist.listings.all():
-        is_watchlist = True
-    else:
-        is_watchlist = False
+    try:
+        watchlist, created = Watchlist.objects.get_or_create(user=request.user)
+        if listing in watchlist.listings.all():
+            is_watchlist = True
+        else:
+            is_watchlist = False
+    except TypeError:
+        is_watchlist = False        
     
     # create form within this view to is has access to this views variables for easier client-side validation
     class BidForm(forms.Form):
@@ -248,6 +250,37 @@ def category(request, category_name):
     })
 
 
+### watchlist ###
+
+def watchlist(request):
+    
+    try:
+        watchlist = Watchlist.objects.get(user = request.user)
+        watchlist_items = watchlist.listings.all()
+    except ObjectDoesNotExist:
+        watchlist_items = None
+        
+    # get highest bid for each listing from Bid table
+    for listing in watchlist_items:
+        if Bid.objects.filter(listing = listing.id):
+            listing.bid_count = Bid.objects.filter(listing = listing.id).count()
+            listing.highest_bid = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].bid_amount
+        else:
+            listing.highest_bid = None
+    
+    
+    # remove listing from watchlist
+    if request.method == "POST":
+        if "remove_from_watchlist" in request.POST:
+            print(request.POST["listing_id"])
+            listing = Listing.objects.get(id=request.POST["listing_id"])
+            watchlist.listings.remove(listing)
+            watchlist.save()
+            watchlist_items = watchlist.listings.all()
+        
+    return render(request, "auctions/watchlist.html", {
+        "watchlist_items": watchlist_items,
+    })
 
 
 
