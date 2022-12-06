@@ -19,7 +19,11 @@
         {% if user.is_authenticated and user != listing.user %}
             <form id="watchlist-toggle" action="{% url 'listing' listing.id %}" method="post">
                 {% csrf_token %}
-                <button name="toggle-watchlist" value="toggle-watchlist" class="watchlist-false">Add to Watchlist</button>
+                {% if is_watchlist == False %}
+                    <button name="toggle-watchlist" value="toggle-watchlist" class="watchlist-false">Add to Watchlist</button>
+                {% else %}
+                    <button name="toggle-watchlist" value="toggle-watchlist" class="watchlist-true">Remove from Watchlist</button>
+                {% endif %}
             </form>
         {% endif %}
         <h3>Seller Info</h3>

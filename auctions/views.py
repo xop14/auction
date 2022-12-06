@@ -124,6 +124,15 @@ def listing(request, listing_id):
         "error_message": "No listing found"
     })
     
+    # get watchlist status
+    # get_or_create returns a tuple and so requires the 'created' part which returns True if created and False if not
+    watchlist, created = Watchlist.objects.get_or_create(user=request.user)
+    
+    if listing in watchlist.listings.all():
+        is_watchlist = True
+    else:
+        is_watchlist = False
+    
     # create form within this view to is has access to this views variables for easier client-side validation
     class BidForm(forms.Form):
         bid_amount = forms.DecimalField(label="Bid amount (USD)", decimal_places=2, max_digits=7, min_value=max(current_highest_bid, listing.starting_bid) + 1)
@@ -136,23 +145,23 @@ def listing(request, listing_id):
         if "delete" in request.POST:
             listing.delete()
             return HttpResponseRedirect(reverse("index"))
+        
         if "edit" in request.POST:
             return HttpResponseRedirect(reverse("edit", kwargs={"listing_id": listing_id}))
+        
         if "end" in request.POST:
             listing.is_active = False
             listing.save()
-        if "toggle-watchlist" in request.POST:
-            # get_or_create returns a tuple and so requires the 'created' part which returns True if created and False if not
-            watchlist, created = Watchlist.objects.get_or_create(user=request.user)
             
+        if "toggle-watchlist" in request.POST:
+            # add or remove toggle from watchlist
             if listing in watchlist.listings.all():
                 watchlist.listings.remove(listing)
+                is_watchlist = False
             else:
                 watchlist.listings.add(listing)
-                
+                is_watchlist = True
             watchlist.save()
-            
-            print(watchlist)
             
         # bid section
         if "bid_amount" in request.POST:
@@ -197,7 +206,8 @@ def listing(request, listing_id):
         "listing": listing,
         "bid_form": bid_form,
         "current_highest_bid": current_highest_bid,
-        "current_highest_bidder": current_highest_bidder
+        "current_highest_bidder": current_highest_bidder,
+        "is_watchlist": is_watchlist
     })
 
 
