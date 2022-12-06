@@ -46,3 +46,8 @@ class Comment(models.Model):
                 User ID: {self.user}
                 Comment: {self.comment}
                 """
+
+class Watchlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlist")
+    listings = models.ManyToManyField(Listing)
+    updated = models.DateTimeField(auto_now=True)

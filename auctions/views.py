@@ -141,6 +141,18 @@ def listing(request, listing_id):
         if "end" in request.POST:
             listing.is_active = False
             listing.save()
+        if "toggle-watchlist" in request.POST:
+            # get_or_create returns a tuple and so requires the 'created' part which returns True if created and False if not
+            watchlist, created = Watchlist.objects.get_or_create(user=request.user)
+            
+            if listing in watchlist.listings.all():
+                watchlist.listings.remove(listing)
+            else:
+                watchlist.listings.add(listing)
+                
+            watchlist.save()
+            
+            print(watchlist)
             
         # bid section
         if "bid_amount" in request.POST:

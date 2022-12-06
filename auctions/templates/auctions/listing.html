@@ -16,6 +16,12 @@
         {% endif %}
         <h3>Description</h3>
         <p>{{ listing.description }}</p>
+        {% if user.is_authenticated and user != listing.user %}
+            <form id="watchlist-toggle" action="{% url 'listing' listing.id %}" method="post">
+                {% csrf_token %}
+                <button name="toggle-watchlist" value="toggle-watchlist" class="watchlist-false">Add to Watchlist</button>
+            </form>
+        {% endif %}
         <h3>Seller Info</h3>
         <p>Seller: {{ listing.user }}</p>
         <div>
