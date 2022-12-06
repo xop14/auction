@@ -47,6 +47,9 @@
             <form action="{% url 'listing' listing.id %}" method="post">
                 {% csrf_token %}
                 {{ bid_form }}
+                {% if bid_error %}
+                    <p>{{ bid_error }}</p>
+                {% endif %}
                 <button type="submit">Submit bid</button>
             </form>
         {% endif %}

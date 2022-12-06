@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django import forms
@@ -25,8 +25,20 @@ class CreateListingForm(forms.Form):
 ### main pages ###
 
 def index(request):
+    
+    # get list of active listings
+    listings = Listing.objects.filter(is_active = True)
+    
+    # get highest bid for each listing from Bid table
+    for listing in listings:
+        if Bid.objects.filter(listing = listing.id):
+            listing.bid_count = Bid.objects.filter(listing = listing.id).count()
+            listing.highest_bid = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].bid_amount
+        else:
+            listing.highest_bid = None
+    
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all(),
+        "listings": listings,
     })
 
 
@@ -96,8 +108,6 @@ def edit(request, listing_id):
 
 def listing(request, listing_id):
     
-    error_message = None
-    
     # check if bids exist for this listing and set bid-related variables
     if Bid.objects.filter(listing = listing_id):
         current_highest_bid = Bid.objects.filter(listing = listing_id).order_by('-bid_amount')[0].bid_amount
@@ -114,6 +124,9 @@ def listing(request, listing_id):
         "error_message": "No listing found"
     })
     
+    # create form within this view to is has access to this views variables for easier client-side validation
+    class BidForm(forms.Form):
+        bid_amount = forms.DecimalField(label="Bid amount (USD)", decimal_places=2, max_digits=7, min_value=max(current_highest_bid, listing.starting_bid) + 1)
     
     # post
     if request.method == "POST":
@@ -132,6 +145,29 @@ def listing(request, listing_id):
         # bid section
         if "bid_amount" in request.POST:
             this_bid = float(request.POST["bid_amount"])
+            print(this_bid)
+            print(current_highest_bid)
+            print(Listing.starting_bid)
+            
+            # server-side validation - return listing page with error message if submitted bid is too low
+            if this_bid <= current_highest_bid or this_bid <= listing.starting_bid: 
+                # create the form already instantiated with the submitted bit date
+                bid_form = BidForm(initial={"bid_amount": this_bid})
+                
+                # 
+                if current_highest_bid == 0.00:
+                    current_highest_bid = None
+                    
+                return render(request, "auctions/listing.html", {
+                    "listing_id": listing_id,
+                    "bid_error": "This bid is too low",
+                    "this_bid": this_bid,
+                    "listing": listing,
+                    "bid_form": bid_form,
+                    "current_highest_bid": current_highest_bid,
+                    "current_highest_bidder": current_highest_bidder
+                })
+            
             bid = Bid(
                 user_id = request.user.id,
                 listing_id = listing_id,
@@ -140,18 +176,13 @@ def listing(request, listing_id):
             bid.save()
             return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
     
-    # create form within this view to is has access to this views variables for easier validation
-    class BidForm(forms.Form):
-        bid_amount = forms.DecimalField(label="Bid amount (USD)", decimal_places=2, max_digits=7, min_value=max(current_highest_bid, listing.starting_bid) + 1)
-    
-    bid_form = BidForm()
-    
     if current_highest_bid == 0.00:
         current_highest_bid = None
     
+    bid_form = BidForm()
+    
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "error_message": error_message,
         "bid_form": bid_form,
         "current_highest_bid": current_highest_bid,
         "current_highest_bidder": current_highest_bidder
