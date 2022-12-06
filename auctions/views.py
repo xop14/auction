@@ -52,7 +52,7 @@ def create(request):
             listing = Listing(
                 title = form.cleaned_data["title"],
                 description = form.cleaned_data["description"],
-                category = form.cleaned_data["category"],
+                category = form.cleaned_data["category"].casefold(),
                 photo_url = form.cleaned_data["photo_url"],
                 starting_bid = form.cleaned_data["starting_bid"],
                 user = request.user
@@ -83,7 +83,7 @@ def edit(request, listing_id):
         if form.is_valid():
             listing.title = form.cleaned_data["title"]
             listing.description = form.cleaned_data["description"]
-            listing.category = form.cleaned_data["category"]
+            listing.category = form.cleaned_data["category"].casefold()
             listing.photo_url = form.cleaned_data["photo_url"]
             listing.starting_bid = form.cleaned_data["starting_bid"]
             listing.save()
@@ -189,12 +189,52 @@ def listing(request, listing_id):
     })
 
 
+  
+### Categories ###
+
+def categories(request):
+    
+    listings = Listing.objects.filter(is_active = True).order_by("category")
+    
+    categories = []
+    
+    for listing in listings:
+        if listing.category not in categories:
+            categories.append(listing.category)
+        
+    return render(request, "auctions/categories.html", {
+        "categories": categories,
+    })
+
+### Category ###
+
+def category(request, category_name):
+    
+    listings = Listing.objects.filter(is_active = True).filter(category = category_name)
+    
+    # get highest bid for each listing from Bid table
+    for listing in listings:
+        if Bid.objects.filter(listing = listing.id):
+            listing.bid_count = Bid.objects.filter(listing = listing.id).count()
+            listing.highest_bid = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].bid_amount
+        else:
+            listing.highest_bid = None
+        
+    return render(request, "auctions/category.html", {
+        "listings": listings,
+        "category_name": category_name,
+    })
 
 
 
 
 
-### user management ###
+
+
+
+
+
+### USER MANAGEMENT ###
 
 def login_view(request):
     if request.method == "POST":
