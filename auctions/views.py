@@ -113,7 +113,7 @@ def listing(request, listing_id):
         current_highest_bid = Bid.objects.filter(listing = listing_id).order_by('-bid_amount')[0].bid_amount
         current_highest_bidder = Bid.objects.filter(listing = listing_id).order_by('-bid_amount')[0].user
     else:
-        current_highest_bid = 0.00
+        current_highest_bid = None
         current_highest_bidder = None
     
     # get listing content and return error message if listing does not exist
@@ -133,13 +133,32 @@ def listing(request, listing_id):
         else:
             is_watchlist = False
     except TypeError:
-        is_watchlist = False        
+        is_watchlist = False
+        
+    # get comments
+    try:
+        comments = Comment.objects.get(listing = listing_id)
+    except ObjectDoesNotExist:
+        comments = None
+    
+    
+    # calculate minimum bid for form validation min value
+    if current_highest_bid:
+        min_bid = float(current_highest_bid) + 0.01
+    else: 
+        min_bid = float(listing.starting_bid) + 0.01
     
     # create form within this view to is has access to this views variables for easier client-side validation
     class BidForm(forms.Form):
-        bid_amount = forms.DecimalField(label="Bid amount (USD)", decimal_places=2, max_digits=7, min_value=max(current_highest_bid, listing.starting_bid) + 1)
+        bid_amount = forms.DecimalField(label="Bid amount (USD)", decimal_places=2, max_digits=7, min_value = min_bid, max_value=10000, widget=forms.NumberInput(attrs={'placeholder': f"${min_bid} or more"}))
     
-    # post
+    bid_form = BidForm()
+    bid_error = None
+    this_bid = None
+    
+    
+    
+    # POST 
     if request.method == "POST":
         print(request.POST)
         
@@ -167,49 +186,35 @@ def listing(request, listing_id):
             
         # bid section
         if "bid_amount" in request.POST:
-            this_bid = float(request.POST["bid_amount"])
-            print(this_bid)
-            print(current_highest_bid)
-            print(Listing.starting_bid)
-            
-            # server-side validation - return listing page with error message if submitted bid is too low
-            if this_bid <= current_highest_bid or this_bid <= listing.starting_bid: 
+            print(request.POST["bid_amount"])
+            bid_form = BidForm(request.POST)
+            if bid_form.is_valid():
+                print("valid!!!")
+                this_bid = bid_form.cleaned_data["bid_amount"]
+                bid = Bid(
+                    user_id = request.user.id,
+                    listing_id = listing_id,
+                    bid_amount = this_bid
+                    )
+                bid.save()
+                return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+            else:
+                print("invalid!!!")
+                this_bid = None
                 # create the form already instantiated with the submitted bit date
-                bid_form = BidForm(initial={"bid_amount": this_bid})
-                
-                # 
-                if current_highest_bid == 0.00:
-                    current_highest_bid = None
-                    
-                return render(request, "auctions/listing.html", {
-                    "listing_id": listing_id,
-                    "bid_error": "This bid is too low",
-                    "this_bid": this_bid,
-                    "listing": listing,
-                    "bid_form": bid_form,
-                    "current_highest_bid": current_highest_bid,
-                    "current_highest_bidder": current_highest_bidder
-                })
-            
-            bid = Bid(
-                user_id = request.user.id,
-                listing_id = listing_id,
-                bid_amount = this_bid
-                )
-            bid.save()
-            return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
-    
-    if current_highest_bid == 0.00:
-        current_highest_bid = None
-    
-    bid_form = BidForm()
+                bid_form = BidForm(initial={"bid_amount": request.POST["bid_amount"]})
+                bid_error = "Please enter a valid bid"
+
     
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "bid_form": bid_form,
+        "bid_error": bid_error,
+        "this_bid": this_bid,
         "current_highest_bid": current_highest_bid,
         "current_highest_bidder": current_highest_bidder,
-        "is_watchlist": is_watchlist
+        "is_watchlist": is_watchlist,
+        "comments": comments,
     })
 
 
