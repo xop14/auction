@@ -5,17 +5,6 @@
         <h2>No Listing Found</h2>
     {% else %}
         <h2>Listing: {{ listing.title }}</h2>
-        {% if listing.is_active == True %}
-            <p>Status: Active</p>
-        {% else %}
-            <p>Status: Finished</p>
-            {% if user == current_highest_bidder %}
-                <h2>Congratulations, {{ current_highest_bidder}}! You have won this listing with a bid of ${{ current_highest_bid }}</h2>
-            {% elif user == listing.user%}
-                <h2>Won by {{ current_highest_bidder }} with a bid of ${{ current_highest_bid }}</h2>
-            {% endif %}
-        {% endif %}
-        <p>Add to watch list</p>
         {% if listing.photo_url %}
             <img src="{{ listing.photo_url}}" width="400px" alt="{{ listing.title }}">
         {% endif %}
@@ -46,18 +35,28 @@
             {% endif %}
         </div>
         <h3>Bid Status</h3>
-        <p>Starting bid: ${{ listing.starting_bid }}</p>
-        <p>Current highest bid:
-            {% if current_highest_bid %}
-                ${{ current_highest_bid }}
+        {% if listing.is_active == True %}
+            <p>Status: Active</p>
+            <p>Starting bid: ${{ listing.starting_bid }}</p>
+            <p>Current highest bid:
+                {% if current_highest_bid %}
+                    ${{ current_highest_bid }}
+                {% else %}
+                    No bids yet
+                {% endif %}
+                {% if current_highest_bidder %}
+                    ({{ current_highest_bidder }})
+                {% endif %}
+            </p>
+        {% else %}
+            <p>Status: Finished</p>
+            {% if user == current_highest_bidder %}
+                <p><strong>Congratulations, {{ current_highest_bidder}}! You have won this listing with a bid of ${{ current_highest_bid }}</strong></p>
             {% else %}
-                No bids yet
+                <p>Won by {{ current_highest_bidder }} with a bid of ${{ current_highest_bid }}</p>
             {% endif %}
-            {% if current_highest_bidder %}
-                ({{ current_highest_bidder }})
-            {% endif %}
-        </p>
-        {% if user.is_authenticated and listing.user != user %}
+        {% endif %}
+        {% if user.is_authenticated and listing.user != user and listing.is_active%}
             <h3>Make new bid for this item</h3>
             <form action="{% url 'listing' listing.id %}" method="post">
                 {% csrf_token %}
@@ -78,7 +77,7 @@
         {% else %}
             <p>No comments yet</p>
         {% endif %}
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and listing.is_active %}
             <form action="{% url 'listing' listing.id %}" method="post">
                 {% csrf_token %}
                 {{ comment_form }}

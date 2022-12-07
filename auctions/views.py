@@ -37,11 +37,13 @@ def index(request):
         if Bid.objects.filter(listing = listing.id):
             listing.bid_count = Bid.objects.filter(listing = listing.id).count()
             listing.highest_bid = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].bid_amount
+            listing.highest_bidder = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].user
         else:
             listing.highest_bid = None
     
     return render(request, "auctions/index.html", {
         "listings": listings,
+        "title": "Active Listings",
     })
 
 
@@ -281,7 +283,7 @@ def watchlist(request):
     
     try:
         watchlist = Watchlist.objects.get(user = request.user)
-        watchlist_items = watchlist.listings.all()
+        watchlist_items = watchlist.listings.order_by("-is_active").all()
     except ObjectDoesNotExist:
         watchlist_items = None
         
@@ -309,7 +311,54 @@ def watchlist(request):
     })
 
 
+### my listings ###
 
+def mylistings(request):
+    
+    # get list of active listings
+    listings = Listing.objects.filter(user = request.user).order_by("-is_active")
+    
+    # get highest bid for each listing from Bid table
+    for listing in listings:
+        if Bid.objects.filter(listing = listing.id):
+            listing.bid_count = Bid.objects.filter(listing = listing.id).count()
+            listing.highest_bid = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].bid_amount
+            listing.highest_bidder = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].user
+        else:
+            listing.highest_bid = None
+    
+    return render(request, "auctions/index.html", {
+        "listings": listings,
+        "title": "My Listings",
+    })
+
+
+### my bids ###
+
+def mybids(request):
+    
+    # get list of active listings which the current user has bid on
+    listings = Listing.objects.filter(bids__user = request.user).order_by("-is_active")
+    bid_listings = []
+    
+    for listing in listings:
+        if listing not in bid_listings:
+            bid_listings.append(listing)
+    print(bid_listings)
+    
+    # get highest bid and bidder for each listing from Bid table
+    for listing in listings:
+        if Bid.objects.filter(listing = listing.id):
+            listing.bid_count = Bid.objects.filter(listing = listing.id).count()
+            listing.highest_bid = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].bid_amount
+            listing.highest_bidder = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].user
+        else:
+            listing.highest_bid = None
+    
+    return render(request, "auctions/index.html", {
+        "listings": bid_listings,
+        "title": "My Bids",
+    })
 
 
 ### USER MANAGEMENT ###
