@@ -9,6 +9,11 @@
             <p>Status: Active</p>
         {% else %}
             <p>Status: Finished</p>
+            {% if user == current_highest_bidder %}
+                <h2>Congratulations, {{ current_highest_bidder}}! You have won this listing with a bid of ${{ current_highest_bid }}</h2>
+            {% elif user == listing.user%}
+                <h2>Won by {{ current_highest_bidder }} with a bid of ${{ current_highest_bid }}</h2>
+            {% endif %}
         {% endif %}
         <p>Add to watch list</p>
         {% if listing.photo_url %}

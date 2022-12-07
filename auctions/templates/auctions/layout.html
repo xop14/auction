@@ -25,6 +25,12 @@
             </li>
             {% if user.is_authenticated %}
                 <li class="nav-item">
+                    <a class="nav-link" href="{% url 'watchlist' %}">My Listings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'watchlist' %}">My Bids</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
                 </li>
                 <li class="nav-item">

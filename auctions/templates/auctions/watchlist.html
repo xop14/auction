@@ -13,7 +13,17 @@
                         Current highest bid: ${{ listing.highest_bid }} ({{ listing.bid_count }} {% if listing.bid_count == 1 %} bid{% else %} bids{% endif %})
                     {% else %}
                         Starting bid: ${{ listing.starting_bid }}
-                    {% endif %}</p>
+                    {% endif %}
+                </p>
+                <p>
+                    {% if listing.is_active %}
+                        Status: Active
+                    {% elif user == listing.highest_bidder %}
+                        Status: Finished (You won this listing!)
+                    {% else %}
+                        Status: Finished
+                    {% endif %}
+                </p>
                 <a href="{% url 'listing' listing.id %}">View listing</a>
                 <br><br>
                 <form action="{% url 'watchlist' %}" method="post">

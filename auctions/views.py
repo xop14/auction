@@ -157,7 +157,7 @@ def listing(request, listing_id):
     
     # create form within this view to is has access to this views variables for easier client-side validation
     class BidForm(forms.Form):
-        bid_amount = forms.DecimalField(label="Bid amount (USD)", decimal_places=2, max_digits=7, min_value = min_bid, max_value=10000, widget=forms.NumberInput(attrs={'placeholder': f"${min_bid} or more"}))
+        bid_amount = forms.DecimalField(label="Bid amount ($USD)", decimal_places=2, max_digits=7, min_value = min_bid, max_value=10000, widget=forms.NumberInput(attrs={'placeholder': f"{min_bid:.2f} or more"}))
     
     bid_form = BidForm()
     bid_error = None
@@ -285,11 +285,12 @@ def watchlist(request):
     except ObjectDoesNotExist:
         watchlist_items = None
         
-    # get highest bid for each listing from Bid table
+    # get highest bid and bidder for each listing from Bid table and attach to listing object
     for listing in watchlist_items:
         if Bid.objects.filter(listing = listing.id):
             listing.bid_count = Bid.objects.filter(listing = listing.id).count()
             listing.highest_bid = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].bid_amount
+            listing.highest_bidder = Bid.objects.filter(listing = listing.id).order_by('-bid_amount')[0].user
         else:
             listing.highest_bid = None
     
@@ -306,9 +307,6 @@ def watchlist(request):
     return render(request, "auctions/watchlist.html", {
         "watchlist_items": watchlist_items,
     })
-
-
-
 
 
 
