@@ -6,6 +6,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django import forms
+import math
+from decimal import Decimal
 
 from .models import *
 
@@ -19,7 +21,8 @@ class CreateListingForm(forms.Form):
     photo_url = forms.URLField(label="Photo URL (optional)", required=False)
     starting_bid = forms.DecimalField(label="Starting bid (USD)", decimal_places=2, max_digits=7, max_value=9999.99)
     
-    
+class CommentForm(forms.Form):
+    comment = forms.CharField(label="Leave comment", widget=forms.Textarea(attrs={'cols':10, 'rows':3}), max_length=1024)
     
 
 ### main pages ###
@@ -137,16 +140,20 @@ def listing(request, listing_id):
         
     # get comments
     try:
-        comments = Comment.objects.get(listing = listing_id)
+        comments = Comment.objects.filter(listing = listing_id).all()
     except ObjectDoesNotExist:
         comments = None
-    
+        
+    # add comment form
+    comment_form = CommentForm()
     
     # calculate minimum bid for form validation min value
     if current_highest_bid:
-        min_bid = float(current_highest_bid) + 0.01
+        # min_bid = round(Decimal(math.floor(float(current_highest_bid * 100 + 1)) / 100),2)
+        min_bid = round(current_highest_bid + Decimal(0.01), 2)
     else: 
-        min_bid = float(listing.starting_bid) + 0.01
+        # min_bid = round(Decimal(math.floor(float(listing.starting_bid * 100 + 1)) / 100),2)
+        min_bid = round(listing.starting_bid + Decimal(0.01), 2)
     
     # create form within this view to is has access to this views variables for easier client-side validation
     class BidForm(forms.Form):
@@ -155,7 +162,6 @@ def listing(request, listing_id):
     bid_form = BidForm()
     bid_error = None
     this_bid = None
-    
     
     
     # POST 
@@ -186,10 +192,11 @@ def listing(request, listing_id):
             
         # bid section
         if "bid_amount" in request.POST:
-            print(request.POST["bid_amount"])
+            print(f"min-bid: {min_bid}")
+            print(f"user-bid: {request.POST['bid_amount']}")
             bid_form = BidForm(request.POST)
+            print(bid_form.errors)
             if bid_form.is_valid():
-                print("valid!!!")
                 this_bid = bid_form.cleaned_data["bid_amount"]
                 bid = Bid(
                     user_id = request.user.id,
@@ -199,12 +206,24 @@ def listing(request, listing_id):
                 bid.save()
                 return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
             else:
-                print("invalid!!!")
                 this_bid = None
-                # create the form already instantiated with the submitted bit date
+                # create the form already instantiated with the submitted bid data
                 bid_form = BidForm(initial={"bid_amount": request.POST["bid_amount"]})
                 bid_error = "Please enter a valid bid"
 
+        # comment section
+        if "comment" in request.POST:
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = Comment(
+                    comment = comment_form.cleaned_data["comment"],
+                    listing = listing,
+                    user = request.user
+                    )
+                comment.save()
+                return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
+                
+                
     
     return render(request, "auctions/listing.html", {
         "listing": listing,
@@ -215,6 +234,7 @@ def listing(request, listing_id):
         "current_highest_bidder": current_highest_bidder,
         "is_watchlist": is_watchlist,
         "comments": comments,
+        "comment_form": comment_form,
     })
 
 

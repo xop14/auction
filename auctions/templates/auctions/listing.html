@@ -64,6 +64,24 @@
             </form>
         {% endif %}
         <h3>Comments</h3>
-        <p>Comments go here...</p>
+        {% if comments %}
+            {% for comment in  comments %}
+                <h6>{{ comment.user }} {% if comment.user == listing.user %} <span> (SELLER) </span>{% endif %}</h6>
+                <p>{{ comment.comment }}</p>
+                <p class="comment-time-stamp">{{ comment.time_stamp }}</p>
+            {% endfor %}
+        {% else %}
+            <p>No comments yet</p>
+        {% endif %}
+        {% if user.is_authenticated %}
+            <form action="{% url 'listing' listing.id %}" method="post">
+                {% csrf_token %}
+                {{ comment_form }}
+                <button>Leave Comment</button>
+            </form>
+            {% if comment_error %}
+            <p>{{ comment_error }}</p>
+            {% endif %}
+        {% endif %}
     {% endif %}
 {% endblock %}
