@@ -1,7 +1,7 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Category: {{ category_name }}</h2>
+    <h1>Category: {{ category_name }}</h1>
     {% if listings %}
         {% for listing in listings %}
             <div class="listing">
