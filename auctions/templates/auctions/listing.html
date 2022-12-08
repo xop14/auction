@@ -65,7 +65,6 @@
             <div class="listing-page-bids">
                 <h3>Bids</h3>
                 {% if listing.is_active == True %}
-                    <p><strong>Status: </strong>Active</p>
                     <p><strong>Starting bid:</strong> ${{ listing.starting_bid }}</p>
                     <p><strong>Current highest bid:</strong>
                         {% if current_highest_bid %}
@@ -78,7 +77,6 @@
                         {% endif %}
                     </p>
                 {% else %}
-                    <p><strong>Status:</strong> Finished</p>
                     {% if user == current_highest_bidder %}
                         <p><strong>Congratulations, {{ current_highest_bidder}}! You have won this listing with a bid of ${{ current_highest_bid }}</strong></p>
                     {% else %}

@@ -6,76 +6,89 @@
         {% for listing in listings %}
             <div class="listing-card">
 
-                <div class="card-content">
-                    <div class="card-text">
-                        <div class="listing-page-status">
-                            {% if listing.is_active == True %}
-                                <div class="status-icon-sm active">Active</div>
-                            {% else %}
-                                <div class="status-icon-sm finished">Finished</div>
-                            {% endif %}
-                        </div>
-                        <h2>{{ listing.title }}</h2>
+                <div class="card-status">
+                    {% if listing.is_active == True %}
+                        <div class="status-icon-sm active">Active</div>
+                    {% else %}
+                        <div class="status-icon-sm finished">Finished</div>
+                    {% endif %}
+                </div>
 
-                        <p class="description">{{ listing.description }}</p>
-
-                        <div class="listing-status">
-                            {% if listing.is_active %}
-                                {% if listing.highest_bid %}
-                                    <svg style="width:18px;height:18px" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M15 4A8 8 0 1 1 7 12A8 8 0 0 1 15 4M3 12A6 6 0 0 0 7 17.65V19.74A8 8 0 0 1 7 4.26V6.35A6 6 0 0 0 3 12Z" />
-                                    </svg>
-                                    <p><strong>Highest bid:</strong> ${{ listing.highest_bid }} ({{ listing.bid_count }} {% if listing.bid_count == 1 %} bid{% else %} bids{% endif %})</p>
-                                    <svg style="width:18px;height:18px" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
-                                    </svg>
-                                    <p><strong>Highest bidder:</strong> {{ listing.highest_bidder }}</p>
-                                {% else %}
-                                    <strong>Starting bid:</strong> ${{ listing.starting_bid }}
-                                {% endif %}
-                            {% else %}
-                                {% if listing.highest_bid %}
-                                    <svg style="width:18px;height:18px" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M18 2C17.1 2 16 3 16 4H8C8 3 6.9 2 6 2H2V11C2 12 3 13 4 13H6.2C6.6 15 7.9 16.7 11 17V19.08C8 19.54 8 22 8 22H16C16 22 16 19.54 13 19.08V17C16.1 16.7 17.4 15 17.8 13H20C21 13 22 12 22 11V2H18M6 11H4V4H6V11M20 11H18V4H20V11Z" />
-                                    </svg>
-                                    <p><strong>Winning bid:</strong> ${{ listing.highest_bid }} ({{ listing.bid_count }} {% if listing.bid_count == 1 %} bid{% else %} bids{% endif %})</p>
-                                    <svg style="width:18px;height:18px" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M21.1,12.5L22.5,13.91L15.97,20.5L12.5,17L13.9,15.59L15.97,17.67L21.1,12.5M10,17L13,20H3V18C3,15.79 6.58,14 11,14L12.89,14.11L10,17M11,4A4,4 0 0,1 15,8A4,4 0 0,1 11,12A4,4 0 0,1 7,8A4,4 0 0,1 11,4Z" />
-                                    </svg>
-                                    <p><strong>Won by:</strong> {{ listing.highest_bidder }}</p>
-                                {% else %}
-                                    <p>No bids were made</p>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-
-                        <div class="card-buttons">
-                            <a href="{% url 'listing' listing.id %}">
-                                <div class="button">
-                                    <svg style="width:20px;height:20px" viewBox="0 0 24 24">
-                                        <path fill="currentColor" d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
-                                    </svg>
-                                    View listing
-                                </div>
-                            </a>
-                            {% if listing.user == user %}
-                                <a href="{% url 'edit' listing.id%}">
-                                    <div class="button-alt">
-                                        <svg style="width:20px;height:20px" viewBox="0 0 24 24">
-                                            <path fill="currentColor" d="M16.84,2.73C16.45,2.73 16.07,2.88 15.77,3.17L13.65,5.29L18.95,10.6L21.07,8.5C21.67,7.89 21.67,6.94 21.07,6.36L17.9,3.17C17.6,2.88 17.22,2.73 16.84,2.73M12.94,6L4.84,14.11L7.4,14.39L7.58,16.68L9.86,16.85L10.15,19.41L18.25,11.3M4.25,15.04L2.5,21.73L9.2,19.94L8.96,17.78L6.65,17.61L6.47,15.29" />
-                                        </svg>
-                                        Edit listing
-                                    </div>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="card-photo">
+                <div class="card-text">
+                    <h2>{{ listing.title }}</h2>
+                    <div class="card-photo-text">
                         {% if listing.photo_url %}
                             <img src="{{ listing.photo_url }}">
                         {% endif %}
                     </div>
+                    <p class="description">{{ listing.description }}</p>
                 </div>
+
+                <div class="card-photo-right">
+                    {% if listing.photo_url %}
+                        <img src="{{ listing.photo_url }}">
+                    {% endif %}
+                </div>
+
+                <div class="listing-status">
+                    {% if listing.is_active %}
+                        {% if listing.highest_bid %}
+                            <div>
+                                <svg style="width:18px;height:18px" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M15 4A8 8 0 1 1 7 12A8 8 0 0 1 15 4M3 12A6 6 0 0 0 7 17.65V19.74A8 8 0 0 1 7 4.26V6.35A6 6 0 0 0 3 12Z" />
+                                </svg>
+                                <p><strong>Highest bid:</strong> ${{ listing.highest_bid }} ({{ listing.bid_count }} {% if listing.bid_count == 1 %} bid{% else %} bids{% endif %})</p>
+                            </div>
+                            <div>
+                                <svg style="width:18px;height:18px" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                                </svg>
+                                <p><strong>Highest bidder:</strong> {{ listing.highest_bidder }}</p>
+                            </div>
+                        {% else %}
+                            <strong>Starting bid:</strong> ${{ listing.starting_bid }}
+                        {% endif %}
+                    {% else %}
+                        {% if listing.highest_bid %}
+                            <div>
+                                <svg style="width:18px;height:18px" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M14.53 1.45L13.45 2.53L15.05 4.13C15.27 4.38 15.38 4.67 15.38 5S15.27 5.64 15.05 5.86L11.5 9.47L12.5 10.55L16.13 6.94C16.66 6.35 16.92 5.7 16.92 5C16.92 4.3 16.66 3.64 16.13 3.05L14.53 1.45M10.55 3.47L9.47 4.55L10.08 5.11C10.3 5.33 10.41 5.63 10.41 6S10.3 6.67 10.08 6.89L9.47 7.45L10.55 8.53L11.11 7.92C11.64 7.33 11.91 6.69 11.91 6C11.91 5.28 11.64 4.63 11.11 4.03L10.55 3.47M21 5.06C20.31 5.06 19.67 5.33 19.08 5.86L13.45 11.5L14.53 12.5L20.11 6.94C20.36 6.69 20.66 6.56 21 6.56S21.64 6.69 21.89 6.94L22.5 7.55L23.53 6.47L22.97 5.86C22.38 5.33 21.72 5.06 21 5.06M7 8L2 22L16 17L7 8M19 11.06C18.3 11.06 17.66 11.33 17.06 11.86L15.47 13.45L16.55 14.53L18.14 12.94C18.39 12.69 18.67 12.56 19 12.56C19.33 12.56 19.63 12.69 19.88 12.94L21.5 14.53L22.55 13.5L20.95 11.86C20.36 11.33 19.7 11.06 19 11.06Z" />
+                                </svg>
+                                <p><strong>Winning bid:</strong> ${{ listing.highest_bid }} ({{ listing.bid_count }} {% if listing.bid_count == 1 %} bid{% else %} bids{% endif %})</p>
+                            </div>
+                            <div>
+                                <svg style="width:18px;height:18px" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M21.1,12.5L22.5,13.91L15.97,20.5L12.5,17L13.9,15.59L15.97,17.67L21.1,12.5M10,17L13,20H3V18C3,15.79 6.58,14 11,14L12.89,14.11L10,17M11,4A4,4 0 0,1 15,8A4,4 0 0,1 11,12A4,4 0 0,1 7,8A4,4 0 0,1 11,4Z" />
+                                </svg>
+                                <p><strong>Won by:</strong> {{ listing.highest_bidder }}</p>
+                            </div>
+                        {% else %}
+                            <p>No bids were made</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="card-buttons">
+                    <a href="{% url 'listing' listing.id %}">
+                        <div class="button">
+                            <svg style="width:20px;height:20px" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+                            </svg>
+                            View listing
+                        </div>
+                    </a>
+                    {% if listing.user == user %}
+                        <a href="{% url 'edit' listing.id%}">
+                            <div class="button-alt">
+                                <svg style="width:20px;height:20px" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M16.84,2.73C16.45,2.73 16.07,2.88 15.77,3.17L13.65,5.29L18.95,10.6L21.07,8.5C21.67,7.89 21.67,6.94 21.07,6.36L17.9,3.17C17.6,2.88 17.22,2.73 16.84,2.73M12.94,6L4.84,14.11L7.4,14.39L7.58,16.68L9.86,16.85L10.15,19.41L18.25,11.3M4.25,15.04L2.5,21.73L9.2,19.94L8.96,17.78L6.65,17.61L6.47,15.29" />
+                                </svg>
+                                Edit listing
+                            </div>
+                        </a>
+                    {% endif %}
+                </div>
+
             </div>
         {% endfor %}    
     {% else %}
