@@ -163,6 +163,7 @@ form #bid-field {
     height: 100%;
 }
 
+
 /* NAVIGATION */
 
 .top-nav {
@@ -177,17 +178,17 @@ form #bid-field {
     gap: 5px;
 }
 
-nav {
+#main-nav {
     display: flex;
     background-color: var(--nav-color);
     padding: 30px;
-    padding-inline: var(--main-padding-inline);
+    padding-inline: calc(var(--main-padding-inline) + 10px);
     align-items: center;
     flex-wrap: wrap;
 }
 
 
-nav ul {
+#main-nav ul {
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
@@ -195,7 +196,7 @@ nav ul {
     border: 0px;
 }
 
-nav li {
+#main-nav li {
     white-space: nowrap;
     list-style: none;
     padding-block: 10px;
@@ -223,6 +224,23 @@ li > a:hover {
     text-decoration-thickness: 2px;
 }
 
+#hamburger, #cross {
+    display: none;
+    color: var(--highlight-color);
+    cursor: pointer;
+}
+
+#hamburger:hover {
+    color: var(--hover-color);
+}
+
+#hamburger:hover, #cross:hover {
+    color: var(--hover-color);
+}
+#hamburger svg, #hamburger path {
+    pointer-events: none;
+}
+
 .logo {
     min-width: 100px;
     width: 150px;
@@ -238,6 +256,64 @@ li > a:hover {
     transform: scale(1.1) rotate(-3deg);
     transition: 0.4s;
     transition-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+#mobile-nav {
+    background-color: transparent;
+    padding: 30px;
+    display: none;
+    position: absolute;
+    width: 100vw;
+    top: 120px;
+    transition: 1s;
+    z-index: 100;
+    box-shadow: 0px 5px 5px #ccc6;
+}
+
+#mobile-nav ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 30px;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+#mobile-nav .nav-button {
+    width: fit-content;
+
+}
+
+@media only screen and (max-width: 1040px) {
+    .logo {
+        min-width: 100px;
+        width: 120px;
+        bottom: 3px;
+        transition: 0.5s;
+    }
+    #main-nav {
+        padding: 20px;
+    }
+    #main-nav ul {
+        display: none;
+    }
+    #hamburger {
+        display: inline;
+    }
+    #mobile-nav {
+        background-color: var(--nav-color);
+        transition: 1s;
+    }
+}
+
+@media only screen and (min-width: 1040px) {
+    #hamburger {
+        display: none;
+    }
+    #mobile-nav {
+        display: none;
+    }
 }
 
 
