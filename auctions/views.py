@@ -12,7 +12,9 @@ from decimal import Decimal
 from .models import *
 
 
-### forms ###
+
+
+### FORMS ###
 
 class CreateListingForm(forms.Form):
     title = forms.CharField(label="Title", max_length=64)
@@ -29,9 +31,11 @@ class EditListingForm(forms.Form):
 
 class CommentForm(forms.Form):
     comment = forms.CharField(label="Leave comment", widget=forms.Textarea(attrs={'cols':10, 'rows':3}), max_length=1024)
-    
 
-# FUNCTIONS
+
+
+
+### FUNCTIONS ###
 
 # adds highest bid, bidder and the bid count to a listings object
 def add_bidinfo(listings):
@@ -47,9 +51,10 @@ def add_bidinfo(listings):
     
     return listings
     
+    
 
 
-### main pages ###
+### MAIN PAGES ###
 
 def index(request):
     
@@ -110,6 +115,7 @@ def edit(request, listing_id):
         return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_id}))
     
 
+    # create form pre-populated with listing's data
     form = EditListingForm({
         "title": listing.title,
         "description": listing.description,
@@ -182,7 +188,7 @@ def listing(request, listing_id):
     if request.method == "POST":
         print(request.POST)
         
-        # button actions for delete, edit, end
+        # button actions for delete, edit, end, watchlist
         if "delete" in request.POST:
             listing.delete()
             return HttpResponseRedirect(reverse("index"))
@@ -206,10 +212,8 @@ def listing(request, listing_id):
             
         # bid section
         if "bid_amount" in request.POST:
-            print(f"min-bid: {min_bid}")
-            print(f"user-bid: {request.POST['bid_amount']}")
             bid_form = BidForm(request.POST)
-            print(bid_form.errors)
+            
             if bid_form.is_valid():
                 this_bid = bid_form.cleaned_data["bid_amount"]
                 bid = Bid(
@@ -228,6 +232,7 @@ def listing(request, listing_id):
         # comment section
         if "comment" in request.POST:
             comment_form = CommentForm(request.POST)
+            
             if comment_form.is_valid():
                 comment = Comment(
                     comment = comment_form.cleaned_data["comment"],
@@ -251,8 +256,6 @@ def listing(request, listing_id):
     })
 
 
-  
-### Categories ###
 
 def categories(request):
     
@@ -268,7 +271,7 @@ def categories(request):
         "categories": categories,
     })
 
-### Category ###
+
 
 def category(request, category_name):
     
@@ -281,7 +284,6 @@ def category(request, category_name):
     })
 
 
-### watchlist ###
 
 def watchlist(request):
     
@@ -309,7 +311,6 @@ def watchlist(request):
     })
 
 
-### my listings ###
 
 def mylistings(request):
     
@@ -331,7 +332,6 @@ def mylistings(request):
     })
 
 
-### my bids ###
 
 def mybids(request):
     
@@ -359,7 +359,9 @@ def mybids(request):
     })
 
 
-### USER MANAGEMENT ###
+
+
+### USER MANAGEMENT (Pre-made by CS50W staff) ###
 
 def login_view(request):
     if request.method == "POST":
