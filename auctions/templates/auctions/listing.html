@@ -34,7 +34,7 @@
                     </div>
                 {% endif %}
 
-                <h3>Description</h3>
+                <h3 style="margin-top: 20px">Description</h3>
                 <p>{{ listing.description }}</p>
                 {% if user.is_authenticated and user != listing.user %}
                     <form id="watchlist-toggle" action="{% url 'listing' listing.id %}" method="post">

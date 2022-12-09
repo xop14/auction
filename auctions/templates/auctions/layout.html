@@ -6,10 +6,13 @@
         <title>{% block title %}Auctions{% endblock %}</title>
         {% comment %} <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> {% endcomment %}
         <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+        <link rel="shortcut icon" href="{% static 'auctions/images/favicon.svg' %}" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
+
         <div class="container">
+
             <section class="top-nav">
                 {% if user.is_authenticated %}
                    <svg style="width:20px;height:20px" viewBox="0 0 24 24">
@@ -20,7 +23,8 @@
                     Not signed in.
                 {% endif %}
             </section>
-            <nav>
+
+            <nav id="main-nav">
                 <div class="logo">
                     <a href="{% url 'index' %}"><img src="{% static 'auctions/images/my-auction.svg' %}" alt="My Auction Logo"></a>
                 </div>
@@ -63,15 +67,73 @@
                             </a>
                         {% endif %}
                     </ul>
+                    <div id="hamburger">
+                        <svg style="width:32px;height:32px" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+                        </svg>
+                    </div>
+                    <div id="cross">
+                        <svg style="width:32px;height:32px" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M13.46,12L19,17.54V19H17.54L12,13.46L6.46,19H5V17.54L10.54,12L5,6.46V5H6.46L12,10.54L17.54,5H19V6.46L13.46,12Z" />
+                        </svg>
+                    </div>
                 </div>
             </nav>
+
+            <nav id="mobile-nav">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mylistings' %}">My Listings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mybids' %}">My Bids</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'create' %}">Create Listing</a>
+                        </li>
+                        <a class="nav-link" href="{% url 'logout' %}">
+                            <li class="nav-item nav-button">
+                                Log Out
+                            </li>
+                        </a>
+                    {% else %}
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <li class="nav-item nav-button">
+                                Log In
+                            </li>
+                        </a>
+                        <a class="nav-link" href="{% url 'register' %}">
+                            <li class="nav-item nav-button">
+                            Register
+                            </li>
+                        </a>
+                    {% endif %}
+                </ul>
+
+            </nav>
+
             <section class="main">
                 {% block body %}
                 {% endblock %}
             </section>
+
             <footer>
                 <p>This project was created by <a href="https://github.com/xop14">David Green (xop14 on github)</a> using Django and SQLite3 for Hardvard X's CS50W Project 2.</p>
             </footer>
+
         </div>
+
+        <script src="{% static 'auctions/script.js' %}"></script>
+        
     </body>
 </html>
