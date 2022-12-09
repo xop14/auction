@@ -28,10 +28,11 @@ body {
     --highlight-color: #168ed9;
     --heading-color: #222;
     --text-color-dark: #666;
+    --text-color-placeholder: #999;
     --text-color-light: #fff;
     --hover-color: #127eb8;
     --primary-bg-color: #f1f1f1;
-    --alt-bg-color: #e6f2f9;
+    --alt-bg-color: #d2e6f2;
     --card-color: #fff;
     --form-input-borders: #ccc;
 
@@ -88,7 +89,13 @@ a:hover {
 form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
+    position: relative;
+}
+
+form label {
+    margin-bottom: 0px;
+    padding-bottom: 0px;
 }
 
 form input, textarea {
@@ -100,11 +107,21 @@ form input, textarea {
     font-size: 1rem;
     margin-inline: 0px;
     width: 100%;
-    
+    color: var(--text-color-dark);
+}
+
+form input::placeholder {
+    color: var(--text-color-placeholder);
+}
+
+form input:focus, textarea:focus {
+    outline: 2px solid var(--highlight-color);
 }
 
 form textarea {
     resize: vertical;
+    font-family: inherit;
+    height: fit-content;
 }
 
 form button {
@@ -123,6 +140,16 @@ form button {
 
 form button:hover {
     background-color: var(--hover-color);
+}
+
+form #bid-field {
+    padding-left: 28px;
+}
+
+.dollar-sign {
+    position: absolute;
+    bottom: 89px;
+    left: 15px
 }
 
 #listing-settings {
@@ -222,7 +249,7 @@ li > a:hover {
     padding-inline: var(--main-padding-inline);
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 40px;
     flex: 1;
 }
 
@@ -245,6 +272,35 @@ li > a:hover {
 
 .card-status {
     grid-area: 1 / 1 / 2 / 3;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.winner {
+    background-color: gold;
+    color: goldenrod;
+    width: 25px;
+    height: 25px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 2px solid goldenrod;
+    outline: 0px solid #fff;
+}
+
+.winner svg {
+    width: 70%;
+    height: 70%;
+}
+
+.status-icon-sm {
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    width: min-content;
 }
 
 .card-text {
@@ -254,6 +310,8 @@ li > a:hover {
 .description {
     flex: 1;
     margin-bottom: auto;
+    /* overflow: hidden;
+    max-height: calc(1.4rem * 4); */
 }
 
 .listing-card img {
@@ -307,6 +365,11 @@ li > a:hover {
     margin-top: 40px;
 }
 
+.winner-box {
+    background-color: #f9d67d;
+    color: #ad7c01;
+}
+
 .listing-status p {
     margin-right: 20px;
 }
@@ -324,10 +387,6 @@ li > a:hover {
 .listing-status strong {
     white-space: nowrap;
 }
-
-
-
-
 
 .card-buttons {
     grid-area: 4 / 1 / 5 / 3;
@@ -379,7 +438,7 @@ li > a:hover {
     background-color: #fff;
     padding: 30px;
     border-radius: 10px;
-    border-left: 10px solid var(--highlight-color);
+    /* border-left: 10px solid var(--highlight-color); */
     display: flex;
     flex-direction: column;
     gap: 30px;
@@ -389,14 +448,18 @@ li > a:hover {
     max-width: 300px;
 }
 
-.listing-page-header {
-    display: flex;
-    align-items: center;
-}
-
 .listing-page-title {
     margin-right: auto;
+    margin-top: 10px;
 }
+
+.listing-page-status {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
 
 .status-icon {
     padding: 10px 15px;
@@ -407,14 +470,6 @@ li > a:hover {
     margin-left: 20px;
 }
 
-.status-icon-sm {
-    padding: 4px 6px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    width: min-content;
-    margin-bottom: 15px;
-}
 
 .finished {
     border: 2px solid #de2e2e;
@@ -426,7 +481,6 @@ li > a:hover {
     background-color: #cff0af;
     color: #57ad06;
 }
-
 
 .listing-page > div:not(:last-child) {
     padding-bottom: 30px;
@@ -444,10 +498,58 @@ li > a:hover {
     border-radius: 5px;
 }
 
-.listing-page .breadcrumb {
-    font-size: 0.8rem;
-    margin-bottom: 5px;
+.make-bid-box {
+    background-color: var(--alt-bg-color);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
 
+button#delete {
+    background-color: #e7404e;
+    color: var(--text-color-light);
+    border-color: transparent;
+}
+button#delete:hover {
+    background-color: #c2333f;
+}
+
+.listing-page-comments {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment-box {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+}
+.comment-header {
+    display: flex;
+    margin-bottom: 10px;
+    align-items: center;
+}
+.comment-user {
+    flex: 1;
+    color: var(--highlight-color);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.comment-time {
+    color: #aaa;
+    font-size: 0.7rem;
+}
+
+.comment-seller {
+    padding: 3px 5px;
+    border-radius: 3px;
+    background-color: var(--highlight-color);
+    color: var(--text-color-light);
+    font-size: 0.6rem;
 }
 
 
@@ -462,4 +564,30 @@ footer {
     font-size: 0.8rem;
     color: #999;
     margin-top: auto;
+}
+
+
+
+
+/* CATEGORY LIST PAGE */
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.category-list div {
+    background-color: var(--card-color);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.category-list div:hover {
+    background-color: var(--highlight-color);
+    color: var(--text-color-light);
+}
+
+.category-list a {
+    text-decoration: none;
 }

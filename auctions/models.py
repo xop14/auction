@@ -17,7 +17,7 @@ class Listing(models.Model):
     updated = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"ID: {self.id}, \nTitle: {self.title}, \nCategory: {self.category}, \nDescription: {self.description}, \nPhoto URL: {self.photo_url}, \nActive: {self.is_active}, \nStarting Bid: {self.starting_bid}, \nCreated: {self.created}, \nUpdated: {self.updated}"
+        return f"{self.id} | {self.title} | {self.category}"
 
 class Bid(models.Model): 
     time_stamp = models.DateTimeField(auto_now=True)
@@ -26,12 +26,7 @@ class Bid(models.Model):
     bid_amount = models.DecimalField(decimal_places=2, max_digits=7)
     
     def __str__(self):
-        return f"""
-                TimeStamp: {self.time_stamp}
-                Listing ID: {self.listing_id}
-                User ID: {self.user}
-                Bid Amount: {self.bid_amount}
-                """
+        return f"{self.user} | ${self.bid_amount} | listing {self.listing_id}"
 
 class Comment(models.Model):
     time_stamp = models.DateTimeField(auto_now=True)
@@ -40,12 +35,7 @@ class Comment(models.Model):
     comment = models.CharField(max_length=1024)
     
     def __str__(self):
-        return f"""
-                TimeStamp: {self.time_stamp}
-                Listing ID: {self.listing_id}
-                User ID: {self.user}
-                Comment: {self.comment}
-                """
+        return f"{self.user} | '{self.comment}' | listing {self.listing_id}"
 
 class Watchlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlist")
@@ -53,8 +43,4 @@ class Watchlist(models.Model):
     updated = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"""
-                User: {self.user}
-                Listings: {self.listings}
-                Updated: {self.updated}
-                """
+        return f"{self.user}"

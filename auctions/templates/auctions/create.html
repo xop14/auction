@@ -5,6 +5,7 @@
     <form action="{% url "create" %}" method="post">
         {% csrf_token %}
         {{ form }}
+        <span class="dollar-sign">$</span>
         <button type="submit" value="Submit">Create listing</button>
     </form>
 {% endblock %}
